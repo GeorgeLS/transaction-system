@@ -14,13 +14,14 @@ typedef struct {
 } Key;
 
 int HT_LP_Create(HT_LP *ht_out, const size_t value_size, const size_t buckets, Hash_Function hash_function) {
-    if (!ht_out->array) return ENOMEM;
-    if (!ht_out->hash_function) return ENOHASHFUNCTION;
+    void *array = __MALLOC_BYTES(value_size * buckets);
+    if (!array) return ENOMEM;
+    if (!hash_function) return ENOHASHFUNCTION;
     *ht_out = (HT_LP) {
             .value_size = value_size,
             .buckets = buckets,
             .hash_function = hash_function,
-            .array = __MALLOC_BYTES(value_size * buckets)
+            .array = array
     };
     return 0;
 }
