@@ -50,7 +50,7 @@ void HT_LP_Free(HT_LP *ht);
  * @return On Success returns 0,
  * One of the errors on failure (see error_enums.h for details)
  */
-int HT_LP_Try_Get_Value(HT_LP *ht, uint64_t id, void *value_out);
+int HT_LP_Try_Get_Value(HT_LP *ht, uint64_t id, void **value_out);
 
 int HT_LP_Insert(HT_LP *ht, Record *record);
 

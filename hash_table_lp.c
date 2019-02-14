@@ -8,6 +8,8 @@
 #include "utils.h"
 #include "error_enums.h"
 
+#define current_table_element table[outer_probe][inner_probe]
+
 static inline HT_LP_Record_Entry HT_LP_Record_Entry_Create(uint16_t key, size_t value) {
     return (HT_LP_Record_Entry) {
             .key_value_pair.v1 = key,
@@ -47,7 +49,6 @@ void HT_LP_Free(HT_LP *ht) {
 }
 
 int HT_LP_Insert(HT_LP *ht, Record *record) {
-#define current_table_element table[outer_probe][inner_probe]
 #define probe_stop_condition (current_table_element.is_empty || current_table_element.is_deleted)
 
     size_t buckets = ht->buckets;
@@ -75,7 +76,7 @@ int HT_LP_Insert(HT_LP *ht, Record *record) {
                 ht->records[0] = record;
                 goto __EXIT;
             }
-            ++inner_probe;
+            inner_probe = (inner_probe + 1U) % buckets;
         }
         outer_probe = (outer_probe + 1U) % buckets;
         wrapped = (uint8_t) (outer_probe == outer_bucket);
@@ -85,11 +86,35 @@ int HT_LP_Insert(HT_LP *ht, Record *record) {
     return 0;
 }
 
-// TODO(gliontos): Implement this!
-int HT_LP_Try_Get_Value(HT_LP *ht, const uint64_t id, void *value_out) {
-    uint8_t low_key_byte = (uint8_t) (id & 0xFF);
-    uint8_t high_key_byte = (uint8_t) ((id >> 8U) & 0xFF);
-    size_t outer_bucket = ht->hash_function(&low_key_byte, sizeof(uint8_t), ht->buckets);
-    size_t inner_bucket = ht->hash_function(&high_key_byte, sizeof(uint8_t), ht->buckets);
-    return -1;
+int HT_LP_Try_Get_Value(HT_LP *ht, const uint64_t id, void **value_out) {
+    size_t buckets = ht->buckets;
+    uint16_t outer_bucket_key = (uint16_t) (id & 0xFFFF);
+    size_t outer_bucket = ht->hash_function(&outer_bucket_key, sizeof(uint16_t), buckets);
+    uint16_t inner_bucket_key = (uint16_t) ((id >> sizeof(uint16_t)) & 0xFFFF);
+    size_t inner_bucket = ht->hash_function(&inner_bucket_key, sizeof(uint16_t), buckets);
+    size_t outer_probe = outer_bucket;
+    HT_LP_Record_Entry **table = ht->table;
+    uint8_t wrapped = 0U;
+    while (!wrapped) {
+        HT_LP_Record_Entry *entry = &table[outer_bucket][inner_bucket];
+        if (entry->is_empty) return ENOEXISTS;
+        else if (entry->key_value_pair.v1 == inner_bucket_key) {
+            *value_out = ht->records[entry->key_value_pair.v2];
+            goto __EXIT;
+        }
+        size_t inner_probe = (inner_bucket + 1U) % buckets;
+        while (inner_probe != inner_bucket) {
+            if (current_table_element.is_empty) return ENOEXISTS;
+            else if (current_table_element.key_value_pair.v1 == inner_bucket_key) {
+                *value_out = ht->records[current_table_element.key_value_pair.v2];
+                goto __EXIT;
+            }
+            inner_probe = (inner_probe + 1U) % buckets;
+        }
+        ++outer_probe;
+        wrapped = (uint8_t) (outer_probe == outer_bucket);
+    }
+    return ENOEXISTS;
+    __EXIT:
+    return 0;
 }

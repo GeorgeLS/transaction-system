@@ -8,5 +8,6 @@
 #define ENOMEM 20 // Out of memory
 #define ENOHASHFUNCTION 24 // No hash function specified
 #define EHTFULL 28 // Hash table is full
+#define ENOEXISTS 30 // No element in the hash table with the given key
 
 #endif //DBMS_ERROR_ENUMS_H
