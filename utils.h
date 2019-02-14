@@ -28,5 +28,6 @@ uint8_t is_prime(uint64_t n);
 
 size_t calculate_hash_table_size(size_t max_items);
 
+size_t hash_function(void *data, size_t bytes, size_t buckets);
 
 #endif //DBMS_UTILS_H

@@ -24,3 +24,11 @@ size_t calculate_hash_table_size(size_t max_items) {
     while (!is_prime(max_items)) ++max_items;
     return max_items;
 }
+
+size_t hash_function(const void *data, const size_t bytes, const size_t buckets) {
+    size_t hash_value = 0U;
+    for (size_t i = 0U; i != bytes; ++i, ++data) {
+        hash_value += *(uint8_t *) data;
+    }
+    return hash_value % buckets;
+}

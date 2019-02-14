@@ -63,17 +63,21 @@ int HT_LP_Insert(HT_LP *ht, Record *record) {
     while (!wrapped) {
         HT_LP_Record_Entry *entry = &table[outer_bucket][inner_bucket];
         if (entry->is_empty || entry->is_deleted) {
+            size_t offset = (outer_bucket * buckets) + inner_bucket;
             entry->key_value_pair.v1 = inner_bucket_key;
-            entry->key_value_pair.v2 = 0U;
-            ht->records[0] = record;
+            entry->key_value_pair.v2 = offset;
+            entry->is_empty = 0;
+            ht->records[offset] = __MALLOC(1, Record);
+            *((Record *) ht->records[offset]) = *record;
             goto __EXIT;
         }
         size_t inner_probe = (inner_bucket + 1U) % buckets;
         while (inner_probe != inner_bucket) {
             if (probe_stop_condition) {
+                size_t offset = (outer_probe * buckets) + inner_probe;
                 current_table_element.key_value_pair.v1 = inner_bucket_key;
-                current_table_element.key_value_pair.v2 = 0U;
-                ht->records[0] = record;
+                current_table_element.key_value_pair.v2 = offset;
+                ht->records[offset] = record;
                 goto __EXIT;
             }
             inner_probe = (inner_probe + 1U) % buckets;
@@ -98,15 +102,54 @@ int HT_LP_Try_Get_Value(HT_LP *ht, const uint64_t id, void **value_out) {
     while (!wrapped) {
         HT_LP_Record_Entry *entry = &table[outer_bucket][inner_bucket];
         if (entry->is_empty) return ENOEXISTS;
-        else if (entry->key_value_pair.v1 == inner_bucket_key) {
+        else if (entry->key_value_pair.v1 == inner_bucket_key && !entry->is_deleted) {
             *value_out = ht->records[entry->key_value_pair.v2];
             goto __EXIT;
         }
         size_t inner_probe = (inner_bucket + 1U) % buckets;
         while (inner_probe != inner_bucket) {
             if (current_table_element.is_empty) return ENOEXISTS;
-            else if (current_table_element.key_value_pair.v1 == inner_bucket_key) {
+            else if (current_table_element.key_value_pair.v1 == inner_bucket_key &&
+                     !current_table_element.is_deleted) {
                 *value_out = ht->records[current_table_element.key_value_pair.v2];
+                goto __EXIT;
+            }
+            inner_probe = (inner_probe + 1U) % buckets;
+        }
+        ++outer_probe;
+        wrapped = (uint8_t) (outer_probe == outer_bucket);
+    }
+    return ENOEXISTS;
+    __EXIT:
+    return 0;
+}
+
+int HT_LP_Delete(HT_LP *ht, uint64_t id) {
+    size_t buckets = ht->buckets;
+    uint16_t outer_bucket_key = (uint16_t) (id & 0xFFFF);
+    size_t outer_bucket = ht->hash_function(&outer_bucket_key, sizeof(uint16_t), buckets);
+    uint16_t inner_bucket_key = (uint16_t) ((id >> sizeof(uint16_t)) & 0xFFFF);
+    size_t inner_bucket = ht->hash_function(&inner_bucket_key, sizeof(uint16_t), buckets);
+    size_t outer_probe = outer_bucket;
+    HT_LP_Record_Entry **table = ht->table;
+    uint8_t wrapped = 0U;
+    while (!wrapped) {
+        HT_LP_Record_Entry *entry = &table[outer_bucket][inner_bucket];
+        if (entry->is_empty) return ENOEXISTS;
+        else if (entry->key_value_pair.v1 == inner_bucket_key && !entry->is_deleted) {
+            entry->is_deleted = 1U;
+            free(ht->records[entry->key_value_pair.v2]);
+            ht->records[entry->key_value_pair.v2] = NULL;
+            goto __EXIT;
+        }
+        size_t inner_probe = (inner_bucket + 1U) % buckets;
+        while (inner_probe != inner_bucket) {
+            if (current_table_element.is_empty) return ENOEXISTS;
+            else if (current_table_element.key_value_pair.v1 == inner_bucket_key &&
+                     !current_table_element.is_deleted) {
+                current_table_element.is_deleted = 1U;
+                free(ht->records[current_table_element.key_value_pair.v2]);
+                ht->records[current_table_element.key_value_pair.v2] = NULL;
                 goto __EXIT;
             }
             inner_probe = (inner_probe + 1U) % buckets;
