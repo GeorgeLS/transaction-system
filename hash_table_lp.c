@@ -10,10 +10,10 @@
 
 #define current_table_element table[outer_probe][inner_probe]
 
-static inline HT_LP_Record_Entry HT_LP_Record_Entry_Create(uint16_t key, size_t value) {
+static inline HT_LP_Record_Entry HT_LP_Record_Entry_Create(void) {
     return (HT_LP_Record_Entry) {
-            .key_value_pair.v1 = key,
-            .key_value_pair.v2 = value,
+            .key_value_pair.v1 = 0U,
+            .key_value_pair.v2 = 0U,
             .is_deleted = 0U,
             .is_empty = 1U
     };
@@ -29,7 +29,7 @@ int HT_LP_Create(HT_LP *ht_out, const size_t buckets, Hash_Function hash_functio
         table[i] = __MALLOC(buckets, HT_LP_Record_Entry);
         if (!table[i]) return ENOMEM;
         for (size_t j = 0U; j != buckets; ++j) {
-            table[i][j] = HT_LP_Record_Entry_Create(0, 0);
+            table[i][j] = HT_LP_Record_Entry_Create();
         }
     }
     *ht_out = (HT_LP) {
