@@ -13,8 +13,13 @@
 #include "common_types.h"
 
 typedef struct {
-    void *array;
-    size_t value_size;
+    Pair(uint16_t, size_t) key_value_pair;
+    uint8_t is_deleted : 1;
+    uint8_t is_empty : 1;
+} HT_LP_Record_Entry;
+
+typedef struct {
+    HT_LP_Record_Entry **table;
     size_t buckets;
     Hash_Function hash_function;
 } HT_LP;
@@ -45,5 +50,7 @@ void HT_LP_Free(HT_LP *hash_table);
  * One of the errors on failure (see error_enums.h for details)
  */
 int HT_LP_Try_Get_Value(HT_LP *ht, uint64_t id, void *value_out);
+
+int HT_LP_Insert(HT_LP *hash_table, Record *record);
 
 #endif //DBMS_HASH_TABLE_LP_H

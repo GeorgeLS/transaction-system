@@ -22,7 +22,7 @@ typedef struct record {
  * @param duration The duration of the song
  * @return Returns a new record with values the parameters specified
  */
-Record create_record(const char *restrict song_name, const char *restrict artist_name, uint32_t duration);
+Record create_record(uint64_t id, const char *restrict song_name, const char *restrict artist_name, uint32_t duration);
 
 /**
  * print_record - Prints a given record
