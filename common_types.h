@@ -6,9 +6,10 @@
 #define DBMS_COMMON_TYPES_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 // A typedef of function pointer that represents a generic hash function
-typedef size_t (*Hash_Function)(void *data, size_t bytes, size_t buckets);
+typedef size_t (*Hash_Function)(const void *data, const size_t bytes, const size_t buckets);
 
 // A macro that generates an anonymous struct with two fields of the specified type
 #define Pair(T1, T2) \

@@ -22,6 +22,8 @@ typedef struct {
     HT_LP_Record_Entry **table;
     void **records;
     size_t buckets;
+    size_t outer_buckets;
+    size_t inner_buckets;
     Hash_Function hash_function;
 } HT_LP;
 
@@ -58,7 +60,7 @@ int HT_LP_Insert(HT_LP *ht, Record *record);
  * @return On Success returns 0,
  * ENOEXISTS on failure (see error_enums.h for details)
  */
-int HT_LP_Try_Get_Value(HT_LP *ht, uint64_t id, void **value_out);
+int HT_LP_Try_Get_Value(HT_LP *ht, uint32_t id, void **value_out);
 
 /**
  * HT_LP_Delete - Deletes the record with the id specified from the hash table
@@ -67,6 +69,6 @@ int HT_LP_Try_Get_Value(HT_LP *ht, uint64_t id, void **value_out);
  * @return On Success returns 0,
  * ENOEXISTS on failure (see error_enums.h for details)
  */
-int HT_LP_Delete(HT_LP *ht, uint64_t id);
+int HT_LP_Delete(HT_LP *ht, uint32_t id);
 
 #endif //DBMS_HASH_TABLE_LP_H

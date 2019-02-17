@@ -7,9 +7,9 @@
 
 #include <stdint.h>
 
-// NOTE(gliontos): Use uint64_t for ID for now. Maybe we will create 128-bit keys in the future
+// NOTE(gliontos): Use uint32_t for ID for now. Maybe we will create 128-bit keys in the future
 typedef struct record {
-    uint64_t id;
+    uint32_t id;
     char song_name[32];
     char artist_name[32];
     uint32_t duration;
@@ -22,12 +22,14 @@ typedef struct record {
  * @param duration The duration of the song
  * @return Returns a new record with values the parameters specified
  */
-Record create_record(uint64_t id, const char *restrict song_name, const char *restrict artist_name, uint32_t duration);
+Record create_record(uint32_t id, const char *restrict song_name, const char *restrict artist_name, uint32_t duration);
 
 /**
  * print_record - Prints a given record
  * @param record A pointer to a record to print
  */
 void print_record(const Record *record);
+
+void copy_record(Record *dest, const Record *source);
 
 #endif //DBMS_ENTITIES_H

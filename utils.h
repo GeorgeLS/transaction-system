@@ -22,12 +22,14 @@ do { \
 
 #define __MALLOC(size, type) ((type*) malloc((size) * sizeof(type)))
 
-#define __MALLOC_BYTES(size) (malloc((size)))
+#define BITS(type) (sizeof(type) << 3U)
 
 uint8_t is_prime(uint64_t n);
 
 size_t calculate_hash_table_size(size_t max_items);
 
-size_t hash_function(void *data, size_t bytes, size_t buckets);
+size_t hash_function(const void *data, const size_t bytes, const size_t buckets);
+
+uint32_t generate_id(void);
 
 #endif //DBMS_UTILS_H
