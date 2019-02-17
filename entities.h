@@ -30,6 +30,4 @@ Record create_record(uint32_t id, const char *restrict song_name, const char *re
  */
 void print_record(const Record *record);
 
-void copy_record(Record *dest, const Record *source);
-
 #endif //DBMS_ENTITIES_H

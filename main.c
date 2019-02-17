@@ -4,7 +4,7 @@
 #include "hash_table_lp.h"
 #include "utils.h"
 
-#define RECORDS_N 100
+#define RECORDS_N 10000
 
 uint32_t ids[RECORDS_N];
 

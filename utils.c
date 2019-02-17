@@ -44,15 +44,15 @@ uint32_t generate_id(void) {
     static uint8_t bitmaps_initialized = 0U;
     if (!bitmaps_initialized) {
         srandom((unsigned int) time(NULL));
-        create_bitmap(&low_bitmap, BITS(uint16_t));
-        create_bitmap(&high_bitmap, BITS(uint16_t));
+        create_bitmap(&low_bitmap, UINT16_MAX);
+        create_bitmap(&high_bitmap, UINT16_MAX);
         bitmaps_initialized = 1U;
     }
     while (1) {
         uint16_t low_bits = (uint16_t) ((random() % UINT16_MAX) + 1U);
         uint16_t high_bits = (uint16_t) ((random() % UINT16_MAX) + 1U);
         if (!get_bit(&low_bitmap, low_bits) && !get_bit(&high_bitmap, high_bits)) {
-            uint32_t res = (high_bits << 16U) | low_bits;
+            uint32_t res = (high_bits << BITS(uint16_t)) | low_bits;
             set_bit(&low_bitmap, low_bits);
             set_bit(&high_bitmap, high_bits);
             return res;

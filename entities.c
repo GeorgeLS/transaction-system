@@ -25,10 +25,3 @@ void print_record(const Record *record) {
            record->id, record->song_name,
            record->artist_name, record->duration);
 }
-
-void copy_record(Record *dest, const Record *source) {
-    dest->id = source->id;
-    dest->duration = source->duration;
-    memcpy(dest->song_name, source->song_name, sizeof(dest->song_name));
-    memcpy(dest->artist_name, source->artist_name, sizeof(dest->artist_name));
-}

@@ -12,8 +12,10 @@
 #define BIT_OFFSET(pos) ((pos - 1U) & 63U)
 
 int create_bitmap(Bitmap_t *bitmap_out, size_t bits) {
-    uint64_t *bitmap = __MALLOC(BYTE_POS(bits) + 1, uint64_t);
+    size_t units = BYTE_POS(bits) + 1U;
+    uint64_t *bitmap = __MALLOC(units, uint64_t);
     if (!bitmap) return ENOMEM;
+    memset(bitmap, '\0', units * sizeof(uint64_t));
     *bitmap_out = (Bitmap_t) {._bitmap = bitmap};
     return 0;
 }

@@ -10,8 +10,6 @@
 
 #define current_table_element table[outer_probe][inner_probe]
 
-#define MAX_INNER_BUCKET_SIZE (1U << 16U)
-
 static inline HT_LP_Record_Entry HT_LP_Record_Entry_Create(void) {
     return (HT_LP_Record_Entry) {
             .key_value_pair.v1 = 0U,
@@ -44,8 +42,8 @@ int HT_LP_Create(HT_LP *ht_out, const size_t buckets, Hash_Function hash_functio
     void **records = __MALLOC(buckets, void*);
     if (!records) return ENOMEM;
     for (size_t i = 0U; i != buckets; ++i) { records[i] = NULL; }
-    size_t outer_buckets = ((buckets - 1U) / MAX_INNER_BUCKET_SIZE) + 1U;
-    size_t inner_buckets = MAX_INNER_BUCKET_SIZE;
+    size_t outer_buckets = ((buckets - 1U) / UINT16_MAX) + 1U;
+    size_t inner_buckets = UINT16_MAX;
     HT_LP_Record_Entry **table = __MALLOC(outer_buckets, HT_LP_Record_Entry*);
     if (!table) return ENOMEM;
     for (size_t i = 0U; i != outer_buckets; ++i) {
@@ -81,17 +79,15 @@ static inline void HT_LP_Record_Entry_Set(HT_LP_Record_Entry *entry, const uint1
     entry->key_value_pair.v1 = key;
     entry->key_value_pair.v2 = value;
     record_table[value] = __MALLOC(1, Record);
-    copy_record(record_table[value], record);
+    memcpy(record_table[value], record, sizeof(Record));
 }
 
 int HT_LP_Insert(HT_LP *ht, Record *record) {
-#define probe_stop_condition (current_table_element.is_empty || current_table_element.is_deleted)
-
     size_t outer_buckets = ht->outer_buckets;
     size_t inner_buckets = ht->inner_buckets;
     uint16_t outer_bucket_key = (uint16_t) (record->id & 0xFFFF);
     size_t outer_bucket = ht->hash_function(&outer_bucket_key, sizeof(uint16_t), outer_buckets);
-    uint16_t inner_bucket_key = (uint16_t) ((record->id >> BITS(uint16_t)) & 0xFFFF);
+    uint16_t inner_bucket_key = (uint16_t) (record->id >> BITS(uint16_t));
     size_t inner_bucket = ht->hash_function(&inner_bucket_key, sizeof(uint16_t), inner_buckets);
     size_t outer_probe = outer_bucket;
     HT_LP_Record_Entry **table = ht->table;
@@ -106,7 +102,7 @@ int HT_LP_Insert(HT_LP *ht, Record *record) {
         }
         size_t inner_probe = (inner_bucket + 1U) % inner_buckets;
         while (inner_probe != inner_bucket) {
-            if (probe_stop_condition) {
+            if (current_table_element.is_empty || current_table_element.is_deleted) {
                 ssize_t offset = get_available_record_index(ht);
                 if (offset == -1) return EHTFULL;
                 HT_LP_Record_Entry_Set(&current_table_element, inner_bucket_key, offset, ht->records, record);
@@ -127,7 +123,7 @@ int HT_LP_Try_Get_Value(HT_LP *ht, const uint32_t id, void **value_out) {
     size_t inner_buckets = ht->inner_buckets;
     uint16_t outer_bucket_key = (uint16_t) (id & 0xFFFF);
     size_t outer_bucket = ht->hash_function(&outer_bucket_key, sizeof(uint16_t), outer_buckets);
-    uint16_t inner_bucket_key = (uint16_t) ((id >> BITS(uint16_t)) & 0xFFFF);
+    uint16_t inner_bucket_key = (uint16_t) (id >> BITS(uint16_t));
     size_t inner_bucket = ht->hash_function(&inner_bucket_key, sizeof(uint16_t), inner_buckets);
     size_t outer_probe = outer_bucket;
     HT_LP_Record_Entry **table = ht->table;
