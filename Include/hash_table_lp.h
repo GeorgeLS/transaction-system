@@ -21,9 +21,10 @@ typedef struct {
 typedef struct {
     HT_LP_Record_Entry **table;
     void **records;
-    size_t buckets;
     size_t outer_buckets;
-    size_t inner_buckets;
+    size_t *inner_buckets;
+    size_t total_buckets;
+    size_t insertions;
     Hash_Function hash_function;
 } HT_LP;
 
@@ -46,11 +47,13 @@ void HT_LP_Free(HT_LP *ht);
 /**
  * HT_LP_Insert - Inserts a new record to the hash table
  * @param ht The hash table
- * @param record The record to insert
+ * @param id The id of the value
+ * @param value The value to insert
+ * @param value_size The size of the value in bytes
  * @return On Success returns 0,
  * EHTFULL on failure (see error_enums.h for details)
  */
-int HT_LP_Insert(HT_LP *ht, Record *record);
+int HT_LP_Insert(HT_LP *ht, uint32_t id, void *value, size_t value_size);
 
 /**
  * HT_LP_Try_Get_Value - Tries to retrieve the value with the specified ID

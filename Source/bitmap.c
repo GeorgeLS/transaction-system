@@ -3,9 +3,9 @@
 //
 
 #include <stdlib.h>
-#include "bitmap.h"
-#include "utils.h"
-#include "error_enums.h"
+#include "../Include/bitmap.h"
+#include "../Include/utils.h"
+#include "../Include/error_enums.h"
 
 #define BYTE_POS(pos) ((pos - 1U) >> 6U)
 // That's equivalent to ((pos -1U) % 64U) but since 64 is power of 2 we can do it using bitwise operations

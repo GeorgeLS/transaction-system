@@ -5,8 +5,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include "entities.h"
-#include "utils.h"
+#include "../Include/entities.h"
+#include "../Include/utils.h"
 
 Record create_record(uint32_t id, const char *restrict const song_name,
                      const char *restrict const artist_name, uint32_t duration) {

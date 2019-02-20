@@ -6,8 +6,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
-#include "bitmap.h"
-#include "utils.h"
+#include "../Include/bitmap.h"
+#include "../Include/utils.h"
 
 
 uint8_t is_prime(uint64_t n) {

@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "entities.h"
-#include "hash_table_lp.h"
-#include "utils.h"
+#include "../Include/entities.h"
+#include "../Include/hash_table_lp.h"
+#include "../Include/utils.h"
 
-#define RECORDS_N 10000
+#define RECORDS_N 1000
 
 uint32_t ids[RECORDS_N];
 
@@ -18,7 +18,7 @@ int main() {
         snprintf(artist_name, sizeof(artist_name), "Artist_Name_%zu", i);
         ids[i] = generate_id();
         Record record = create_record(ids[i], song_name, artist_name, 90);
-        HT_LP_Insert(&hash_table, &record);
+        HT_LP_Insert(&hash_table, ids[i], &record, sizeof(Record));
     }
     printf("======================================= AFTER INSERT =======================================\n");
     for (size_t i = 0U; i != RECORDS_N; ++i) {

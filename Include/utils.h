@@ -22,6 +22,8 @@ do { \
 
 #define __MALLOC(size, type) ((type*) malloc((size) * sizeof(type)))
 
+#define __MALLOC_BYTES(bytes) ((void*) malloc((bytes)))
+
 #define BITS(type) (sizeof(type) << 3U)
 
 uint8_t is_prime(uint64_t n);
